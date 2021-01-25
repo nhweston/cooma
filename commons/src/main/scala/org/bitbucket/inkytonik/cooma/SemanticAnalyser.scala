@@ -563,6 +563,16 @@ class SemanticAnalyser(
                     case _             => None
                 }
 
+            case Cond(cond, e1, e2) =>
+                tipe(cond) match {
+                    case Some(BoolT()) =>
+                        val t = tipe(e1)
+                        if (t == tipe(e2)) t
+                        else None
+                    case _ =>
+                        None
+                }
+
             case _ : VarT =>
                 Some(TypT())
         }

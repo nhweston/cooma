@@ -11,23 +11,24 @@ Program =
   Spacing Expression EOF.
 
 Expression {paren} =
-    "fun" '(' Arguments ")" Expression                       {Fun, right, 4}
-  | '(' ArgumentTypes ")" Expression                         {FunT, right, 4}
-  | Expression sp "match" '{' nest(Case+) \n '}'             {Mat, left, 3}
+    "fun" '(' Arguments ")" Expression                       {Fun, right, 5}
+  | '(' ArgumentTypes ")" Expression                         {FunT, right, 5}
+  | "if" Expression "then" Expression "else" Expression      {Cond, left, 3}
+  | Expression sp "match" '{' nest(Case+) \n '}'             {Mat, left, 4}
   | Expression "&" Expression                                {Cat, left, 2}
   | Expression '(' Expression ** "," ')'                     {App, left, 1}
   | Expression '.' FieldUse                                  {Sel, left, 1}
-  | Expression "**" Expression                               {Pow, left, 5}
-  | Expression "*" Expression                                {Mul, left, 6}
-  | Expression "/" Expression                                {Div, left, 6}
-  | Expression "+" Expression                                {Add, left, 7}
-  | Expression "-" Expression                                {Sub, left, 7}
-  | Expression "<=" Expression                               {Lte, none, 8}
-  | Expression ">=" Expression                               {Gte, none, 8}
-  | Expression "<" Expression                                {Lt, none, 8}
-  | Expression ">" Expression                                {Gt, none, 8}
-  | Expression "&&" Expression                               {And, left, 9}
-  | Expression "||" Expression                               {Or, left, 10}
+  | Expression "**" Expression                               {Pow, left, 6}
+  | Expression "*" Expression                                {Mul, left, 7}
+  | Expression "/" Expression                                {Div, left, 7}
+  | Expression "+" Expression                                {Add, left, 8}
+  | Expression "-" Expression                                {Sub, left, 8}
+  | Expression "<=" Expression                               {Lte, none, 9}
+  | Expression ">=" Expression                               {Gte, none, 9}
+  | Expression "<" Expression                                {Lt, none, 9}
+  | Expression ">" Expression                                {Gt, none, 9}
+  | Expression "&&" Expression                               {And, left, 10}
+  | Expression "||" Expression                               {Or, left, 11}
   | '!' Expression                                           {Not}
   | '{' '}'                                                  {Uni}
   | 'Unit'                                                   {UniT}

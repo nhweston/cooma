@@ -353,6 +353,13 @@ trait Compiler {
             case Not(e) =>
                 compile(App(not, Vector(e)), kappa)
 
+            case Cond(cond, e1, e2) =>
+                val cases = Vector(
+                    Case("True", IdnDef("_"), e1),
+                    Case("False", IdnDef("_"), e2)
+                )
+                compileMatch(cond, cases, kappa)
+
             case _ =>
                 sys.error(s"compile: unexpected expression $exp")
         }
