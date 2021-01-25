@@ -350,7 +350,22 @@ class SemanticAnalyser(
     def argsToArgTypes(as : Vector[Argument]) : Vector[ArgumentType] =
         as.map(a => ArgumentType(Some(a.idnDef), a.expression))
 
-    lazy val tipe : Expression => Option[Expression] =
+    lazy val tipe : Expression => Option[Expression] = {
+        def checkArOp(l : Expression, r : Expression) =
+            (tipe(l), tipe(r)) match {
+                case (Some(IntT()), Some(IntT())) => Some(IntT())
+                case _                            => None
+            }
+        def checkRelOp(l : Expression, r : Expression) =
+            (tipe(l), tipe(r)) match {
+                case (Some(IntT()), Some(IntT())) => Some(BoolT())
+                case _                            => None
+            }
+        def checkBoolOp(l : Expression, r : Expression) =
+            (tipe(l), tipe(r)) match {
+                case (Some(BoolT()), Some(BoolT())) => Some(BoolT())
+                case _                              => None
+            }
         attr {
             case App(f, as) =>
                 tipe(f) match {
@@ -509,9 +524,49 @@ class SemanticAnalyser(
             case WriterT() =>
                 Some(TypT())
 
+            case Pow(l, r) =>
+                checkArOp(l, r)
+
+            case Mul(l, r) =>
+                checkArOp(l, r)
+
+            case Div(l, r) =>
+                checkArOp(l, r)
+
+            case Add(l, r) =>
+                checkArOp(l, r)
+
+            case Sub(l, r) =>
+                checkArOp(l, r)
+
+            case Lte(l, r) =>
+                checkRelOp(l, r)
+
+            case Gte(l, r) =>
+                checkRelOp(l, r)
+
+            case Lt(l, r) =>
+                checkRelOp(l, r)
+
+            case Gt(l, r) =>
+                checkRelOp(l, r)
+
+            case And(l, r) =>
+                checkBoolOp(l, r)
+
+            case Or(l, r) =>
+                checkBoolOp(l, r)
+
+            case Not(e) =>
+                tipe(e) match {
+                    case Some(BoolT()) => Some(BoolT())
+                    case _             => None
+                }
+
             case _ : VarT =>
                 Some(TypT())
         }
+    }
 
     def substArgTypes[T](x : String, t : Expression, a : T) = {
         val substArgType =

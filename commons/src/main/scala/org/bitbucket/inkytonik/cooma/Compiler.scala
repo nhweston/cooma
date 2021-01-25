@@ -161,27 +161,27 @@ trait Compiler {
             Field("or", or)
         ))
 
-    def mkPrimField(fieldName : String, argTypes : Vector[Expression], primName : String) : Field = {
+    def mkPrimOp(argTypes : Vector[Expression], primName : String) : Fun = {
         val argNames = (1 to argTypes.length).map(i => s"arg$i")
         val args = argNames.zip(argTypes).map { case (n, t) => Argument(IdnDef(n), t, None) }
         val params = argNames.map(n => Idn(IdnUse(n))).toVector
-        Field(fieldName, Fun(Arguments(args.toVector), Prm(primName, params)))
+        Fun(Arguments(args.toVector), Prm(primName, params))
     }
 
-    def mkInt1PrimField(fieldName : String, primName : String) : Field =
-        mkPrimField(fieldName, Vector(IntT()), primName)
+    def mkInt1PrimOp(primName : String) : Fun =
+        mkPrimOp(Vector(IntT()), primName)
 
-    def mkInt2PrimField(fieldName : String, primName : String) : Field =
-        mkPrimField(fieldName, Vector(IntT(), IntT()), primName)
+    def mkInt2PrimOp(primName : String) : Fun =
+        mkPrimOp(Vector(IntT(), IntT()), primName)
 
-    def mkStr1PrimField(fieldName : String, primName : String) : Field =
-        mkPrimField(fieldName, Vector(StrT()), primName)
+    def mkStr1PrimOp(primName : String) : Fun =
+        mkPrimOp(Vector(StrT()), primName)
 
-    def mkStr2PrimField(fieldName : String, primName : String) : Field =
-        mkPrimField(fieldName, Vector(StrT(), StrT()), primName)
+    def mkStr2PrimOp(primName : String) : Fun =
+        mkPrimOp(Vector(StrT(), StrT()), primName)
 
-    def mkStrIntPrimField(fieldName : String, primName : String) : Field =
-        mkPrimField(fieldName, Vector(StrT(), IntT()), primName)
+    def mkStrIntPrimOp(primName : String) : Fun =
+        mkPrimOp(Vector(StrT(), IntT()), primName)
 
     val equal =
         Fun(
@@ -199,23 +199,23 @@ trait Compiler {
 
     val ints =
         Rec(Vector(
-            mkInt1PrimField("abs", "IntAbs"),
-            mkInt2PrimField("add", "IntAdd"),
-            mkInt2PrimField("div", "IntDiv"),
-            mkInt2PrimField("mul", "IntMul"),
-            mkInt2PrimField("pow", "IntPow"),
-            mkInt2PrimField("sub", "IntSub"),
-            mkInt2PrimField("lt", "IntLt"),
-            mkInt2PrimField("lte", "IntLte"),
-            mkInt2PrimField("gt", "IntGt"),
-            mkInt2PrimField("gte", "IntGte")
+            Field("abs", mkInt1PrimOp("IntAbs")),
+            Field("add", mkInt2PrimOp("IntAdd")),
+            Field("div", mkInt2PrimOp("IntDiv")),
+            Field("mul", mkInt2PrimOp("IntMul")),
+            Field("pow", mkInt2PrimOp("IntPow")),
+            Field("sub", mkInt2PrimOp("IntSub")),
+            Field("lt", mkInt2PrimOp("IntLt")),
+            Field("lte", mkInt2PrimOp("IntLte")),
+            Field("gt", mkInt2PrimOp("IntGt")),
+            Field("gte", mkInt2PrimOp("IntGte"))
         ))
 
     val strings =
         Rec(Vector(
-            mkStr2PrimField("concat", "StrConcat"),
-            mkStr1PrimField("length", "StrLength"),
-            mkStrIntPrimField("substr", "StrSubstr")
+            Field("concat", mkStr2PrimOp("StrConcat")),
+            Field("length", mkStr1PrimOp("StrLength")),
+            Field("substr", mkStrIntPrimOp("StrSubstr"))
         ))
 
     def compile(exp : Expression, kappa : String => Term) : Term =
@@ -316,6 +316,42 @@ trait Compiler {
             // Types erase to unit
             case IsType() =>
                 compile(Uni(), kappa)
+
+            case Pow(l, r) =>
+                compile(App(mkInt2PrimOp("IntPow"), Vector(l, r)), kappa)
+
+            case Mul(l, r) =>
+                compile(App(mkInt2PrimOp("IntMul"), Vector(l, r)), kappa)
+
+            case Div(l, r) =>
+                compile(App(mkInt2PrimOp("IntDiv"), Vector(l, r)), kappa)
+
+            case Add(l, r) =>
+                compile(App(mkInt2PrimOp("IntAdd"), Vector(l, r)), kappa)
+
+            case Sub(l, r) =>
+                compile(App(mkInt2PrimOp("IntSub"), Vector(l, r)), kappa)
+
+            case Lte(l, r) =>
+                compile(App(mkInt2PrimOp("IntLte"), Vector(l, r)), kappa)
+
+            case Gte(l, r) =>
+                compile(App(mkInt2PrimOp("IntGte"), Vector(l, r)), kappa)
+
+            case Lt(l, r) =>
+                compile(App(mkInt2PrimOp("IntLt"), Vector(l, r)), kappa)
+
+            case Gt(l, r) =>
+                compile(App(mkInt2PrimOp("IntGt"), Vector(l, r)), kappa)
+
+            case And(l, r) =>
+                compile(App(and, Vector(l, r)), kappa)
+
+            case Or(l, r) =>
+                compile(App(or, Vector(l, r)), kappa)
+
+            case Not(e) =>
+                compile(App(not, Vector(e)), kappa)
 
             case _ =>
                 sys.error(s"compile: unexpected expression $exp")

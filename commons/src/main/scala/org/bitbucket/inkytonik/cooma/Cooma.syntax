@@ -17,6 +17,18 @@ Expression {paren} =
   | Expression "&" Expression                                {Cat, left, 2}
   | Expression '(' Expression ** "," ')'                     {App, left, 1}
   | Expression '.' FieldUse                                  {Sel, left, 1}
+  | Expression "**" Expression                               {Pow, left, 5}
+  | Expression "*" Expression                                {Mul, left, 6}
+  | Expression "/" Expression                                {Div, left, 6}
+  | Expression "+" Expression                                {Add, left, 7}
+  | Expression "-" Expression                                {Sub, left, 7}
+  | Expression "<=" Expression                               {Lte, none, 8}
+  | Expression ">=" Expression                               {Gte, none, 8}
+  | Expression "<" Expression                                {Lt, none, 8}
+  | Expression ">" Expression                                {Gt, none, 8}
+  | Expression "&&" Expression                               {And, left, 9}
+  | Expression "||" Expression                               {Or, left, 10}
+  | '!' Expression                                           {Not}
   | '{' '}'                                                  {Uni}
   | 'Unit'                                                   {UniT}
   | '{' nestnl(BlockExp) \n '}'                              {Blk}
