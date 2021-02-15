@@ -37,11 +37,14 @@ trait Compiler {
         compileHalt(prog.expression)
     }
 
+    lazy val capabilityNames =
+        Set("HttpGet", "HttpDelete", "HttpPut", "HttpPost", "Reader", "Writer")
+
     /**
      * Name of capability type?
      */
     def isCapabilityName(n : String) : Boolean =
-        (n == "Writer") || (n == "Reader") || (n == "ReaderWriter")
+        capabilityNames(n)
 
     /**
      * Case class and map that stores primitives metadata.
@@ -116,6 +119,14 @@ trait Compiler {
                         t match {
                             case Cat(e1, e2) =>
                                 aux(e1) ::: aux(e2)
+                            case HttpDeleteT() =>
+                                "HttpDelete" :: Nil
+                            case HttpGetT() =>
+                                "HttpGet" :: Nil
+                            case HttpPostT() =>
+                                "HttpPost" :: Nil
+                            case HttpPutT() =>
+                                "HttpPut" :: Nil
                             case ReaderT() =>
                                 "Reader" :: Nil
                             case WriterT() =>
@@ -354,9 +365,9 @@ trait Compiler {
     object IsType {
         def unapply(e : Expression) : Boolean =
             e match {
-                case BoolT() | ReaderT() | WriterT() |
-                    _ : FunT | _ : IntT | _ : RecT | _ : StrT | _ : TypT |
-                    _ : UniT | _ : VarT =>
+                case BoolT() | HttpDeleteT() | HttpGetT() | HttpPostT() | HttpPutT() | ReaderT() |
+                    WriterT() | _ : FunT | _ : IntT | _ : RecT | _ : StrT | _ : TypT | _ : UniT |
+                    _ : VarT =>
                     true
                 case _ =>
                     false

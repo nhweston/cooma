@@ -239,9 +239,9 @@ class SemanticAnalyser(
     def checkMainArgument(arg : Argument) : Messages = {
         def aux(t : Expression) : Boolean =
             t match {
-                case ReaderT() | StrT() | WriterT() => true
-                case Cat(l, r)                      => aux(l) && aux(r)
-                case _                              => false
+                case HttpDeleteT() | HttpGetT() | HttpPostT() | HttpPutT() | ReaderT() | StrT() | WriterT() => true
+                case Cat(l, r) => aux(l) && aux(r)
+                case _ => false
             }
         if (aux(arg.expression)) noMessages
         else error(arg.expression, "illegal main program argument type")
@@ -433,6 +433,9 @@ class SemanticAnalyser(
                 }
 
             case _ : FunT =>
+                Some(TypT())
+
+            case HttpDeleteT() | HttpGetT() | HttpPostT() | HttpPutT() =>
                 Some(TypT())
 
             case u @ Idn(IdnUse(x)) =>
@@ -627,6 +630,10 @@ class SemanticAnalyser(
     def alias(e : Expression) : Expression =
         e match {
             case `boolT`                    => BoolT()
+            case `httpDeleteT`              => HttpDeleteT()
+            case `httpGetT`                 => HttpGetT()
+            case `httpPostT`                => HttpPostT()
+            case `httpPutT`                 => HttpPutT()
             case `readerT`                  => ReaderT()
             case `writerT`                  => WriterT()
             case FunT(ArgumentTypes(as), t) => FunT(ArgumentTypes(as.map(aliasArgType)), alias(t))
@@ -675,6 +682,18 @@ class SemanticAnalyser(
 
             case FunT(ArgumentTypes(us), u) =>
                 unaliasFunT(n, us, u)
+
+            case HttpDeleteT() =>
+                Some(httpDeleteT)
+
+            case HttpGetT() =>
+                Some(httpGetT)
+
+            case HttpPostT() =>
+                Some(httpPostT)
+
+            case HttpPutT() =>
+                Some(httpPutT)
 
             case ReaderT() =>
                 Some(readerT)

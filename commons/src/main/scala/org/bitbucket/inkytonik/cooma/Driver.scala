@@ -99,11 +99,15 @@ abstract class Driver extends CompilerBase[ASTNode, Program, Config] with Server
             config.output().emit(s"  ${argument.idnDef.identifier}: ")
             def aux(t : Expression) : Seq[String] =
                 t match {
-                    case Cat(e1, e2) => aux(e1) ++ aux(e2)
-                    case ReaderT()   => Seq("a reader")
-                    case StrT()      => Seq("a string")
-                    case WriterT()   => Seq("a writer")
-                    case t           => Seq(s"unsupported argument type ${show(t)}")
+                    case Cat(e1, e2)   => aux(e1) ++ aux(e2)
+                    case HttpDeleteT() => Seq("a HTTP client (DELETE)")
+                    case HttpGetT()    => Seq("a HTTP client (GET)")
+                    case HttpPostT()   => Seq("a HTTP client (POST)")
+                    case HttpPutT()    => Seq("a HTTP client (PUT)")
+                    case ReaderT()     => Seq("a reader")
+                    case StrT()        => Seq("a string")
+                    case WriterT()     => Seq("a writer")
+                    case t             => Seq(s"unsupported argument type ${show(t)}")
                 }
             val description = aux(argument.expression).mkString(", ")
             config.output().emit(description)

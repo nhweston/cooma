@@ -31,6 +31,10 @@ Expression {paren} =
   | IntLit                                                   {Num, 1: BigInt.apply : BigInt}
   | 'Int'                                                    {IntT}
   | 'Ints'                                                   {Ints}
+  | 'HttpDelete'                                             {HttpDeleteT}
+  | 'HttpGet'                                                {HttpGetT}
+  | 'HttpPost'                                               {HttpPostT}
+  | 'HttpPut'                                                {HttpPutT}
   | 'Reader'                                                 {ReaderT}
   | 'Writer'                                                 {WriterT}
   | StringLit                                                {Str}
