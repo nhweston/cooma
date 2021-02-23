@@ -196,17 +196,9 @@ object Primitives {
 
     }
 
-    trait HttpService {
-        def request(method : String, url : String) : (Int, String)
-    }
-
     case class HttpClientP[I <: Backend](
         method : String,
-        url : String,
-        service : HttpService = (method : String, url : String) => {
-            val response = Http(url).method(method).asString
-            (response.code, response.body)
-        }
+        url : String
     ) extends Primitive[I] {
         val numArgs = 1
 
@@ -214,7 +206,10 @@ object Primitives {
             val x = xs.head
             interp.isStrR(interp.lookupR(rho, x)) match {
                 case Some(suffix) =>
-                    val (code, body) = service.request(method, url + suffix)
+                    val (code, body) = {
+                        val response = Http(url + suffix).method(method).asString
+                        (response.code, response.body)
+                    }
                     interp.recR(Vector(
                         interp.fldR("code", interp.intR(code)),
                         interp.fldR("body", interp.strR(body))

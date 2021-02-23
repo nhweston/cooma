@@ -49,6 +49,15 @@ class ExecutionTests extends Driver with TestCompilerWithConfig[ASTNode, Program
             )
         )
 
+    val thread = new Thread(() => {
+        try {
+            HttpServer.run(Nil)
+        } catch {
+            case _ : InterruptedException => ()
+        }
+    })
+    thread.start()
+
     for (backend <- backends) {
 
         // Basic tests
@@ -1844,4 +1853,6 @@ class ExecutionTests extends Driver with TestCompilerWithConfig[ASTNode, Program
         else
             super.testdriver(config)
     }
+
+    thread.interrupt()
 }
